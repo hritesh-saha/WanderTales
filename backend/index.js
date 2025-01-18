@@ -5,11 +5,14 @@ const express= require("express");
 const cors = require("cors");
 const mongoose=require("mongoose");
 const jwt = require("jsonwebtoken");
+const path=require("path");
+const fs=require("fs");
 
 const { AuthenticateToken }= require("./utilities/utilities");
 
 const User=require("./models/user.model");
 const TravelStory=require("./models/travelStory.model");
+const upload = require("./multer");
 
 
 const port=process.env.PORT;
@@ -139,7 +142,66 @@ app.post("/add-travel-story", AuthenticateToken, async(req,res)=>{
     catch(error){
         return res.status(400).json({error: true, message: error.message});
     }
-})
+});
+
+//Get all Travel Stories
+app.get("/get-all-stories", AuthenticateToken, async(req,res)=>{
+    const { userId }= req.user;
+
+    try{
+        const travelStories = await TravelStory.find({userId: userId}).sort({ isFavourite:-1});
+        return res.json({error: false, stories: travelStories, message: "Travel Stories Found"});
+    }
+    catch(error){
+        return res.status(400).json({error: true, message: error.message});
+    }
+});
+
+//Route to handle Image Upload
+app.post("/image-upload", upload.single("image"), async(req,res)=>{
+    try{
+        if(!req.file){
+            return res.status(400).json({error: true, message: "Please upload an image!"});
+        }
+
+        const imageUrl=`http://localhost:8000/uploads/${req.file.filename}`;
+        return res.json({error: false, imageUrl: imageUrl, message: "Image uploaded successfully!"});
+    }
+    catch(error){
+        return res.status(400).json({error: true, message: error.message});
+    }
+});
+
+//Delete an Image from Uploads folder
+app.delete("/delete-image", async(req,res)=>{
+    const { imageUrl }= req.query;
+    if(!imageUrl){
+        return res.status(400).json({error: true, message: "Please provide the imagURL!"});
+    };
+
+    try{
+        //Extract filename from imageURL
+        const filename= path.basename(imageUrl);
+
+        //Define file path
+        const filePath = path.join(__dirname, "uploads", filename);
+
+        //Check if file exists
+        if(fs.existsSync(filePath)){
+            //Delete file
+            fs.unlinkSync(filePath);
+            return res.status(200).json({ message:"Image deleted Successfully"});
+        } else {
+            return res.status(400).json({error: true, message: "Image not found!"});
+        }
+    }catch(error){
+        return res.status(500).json({error: true, message: error.message});
+    }
+});
+
+// Serve static files from the uploads and assets directory
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 app.listen(port,()=>{
     console.log(`server is running!`);
