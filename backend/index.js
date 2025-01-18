@@ -126,6 +126,7 @@ app.post("/add-travel-story", AuthenticateToken, async(req,res)=>{
             title,
             story,
             visitedLocation,
+            userId,
             imageUrl,
             visitedDate: parsedvisitedDate,
         });
@@ -136,7 +137,7 @@ app.post("/add-travel-story", AuthenticateToken, async(req,res)=>{
         });
     }
     catch(error){
-        return res.status(400).json({error: true, message: "Invalid Data!"});
+        return res.status(400).json({error: true, message: error.message});
     }
 })
 
