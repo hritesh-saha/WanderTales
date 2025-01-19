@@ -24,6 +24,6 @@
   }
 
   .btn-light {
-    @apply bg-cyan-50 text-primary shadow-cyan-100/0 border border-cyan-100 hover:bg-primary hover:text-white;
+    @apply bg-cyan-50 text-primary shadow-cyan-100/0 border border-cyan-400 hover:bg-primary hover:text-white;
   }
 }

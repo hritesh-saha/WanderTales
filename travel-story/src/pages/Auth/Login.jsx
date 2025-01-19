@@ -4,7 +4,7 @@ const Login = () => {
   return (
     <div className='h-screen bg-cyan-400 overflow-hidden relative'>
       <div className='container h-screen flex justify-center items-center px-20 mx-auto'>
-        <div className='w-2/4 h-[90vh] flex items-end bg-login-bg-img bg-cover bg-center rounded-lg p-10 z-50'>
+        <div className='w-2/4 h-[90vh] flex flex-col justify-end bg-login-bg-img bg-cover bg-center rounded-lg p-10 z-50'>
           <h4 className='text-5xl text-white font-semibold leading-[58px]'>
             Capture Your <br/> Journeys
           </h4>
@@ -15,9 +15,9 @@ const Login = () => {
         </div>
         <div className='w-2/4  h-[75wh] bg-white rounded-r-lg relative p-16 shadow-lg shadow-cyan-200/20'>
           <form onSubmit={()=> {}}>
-            <h4 className="text-2xl font-semibold mb-7">Login</h4>
+            <h4 className="text-2xl font-bold mb-7">Login</h4>
 
-            <input type="text" placeholder='Email' className='input-box' />
+            <input type="text" placeholder='Email' className='input-box border border-slate-400 rounded-xl' />
 
             <button type='submit' className="btn-primary">
               LOGIN
