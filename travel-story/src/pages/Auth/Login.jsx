@@ -1,9 +1,8 @@
 import React from 'react'
-import '../../index.css';
 
 const Login = () => {
   return (
-    <div className='h-screen bg-cyan-200 overflow-hidden relative'>
+    <div className='h-screen bg-cyan-400 overflow-hidden relative'>
       <div className='container h-screen flex justify-center items-center px-20 mx-auto'>
         <div className='w-2/4 h-[90vh] flex items-end bg-login-bg-img bg-cover bg-center rounded-lg p-10 z-50'>
           <h4 className='text-5xl text-white font-semibold leading-[58px]'>
