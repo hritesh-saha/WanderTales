@@ -205,7 +205,7 @@ app.get("/get-all-stories", AuthenticateToken, async(req,res)=>{
 });
 
 //Edit Travel Story
-app.post("/edit-story/:id", AuthenticateToken, async(req,res)=>{
+app.put("/edit-story/:id", AuthenticateToken, async(req,res)=>{
      const { id } =req.params;
      const { title, story, visitedLocation, imageUrl, visitedDate}= req.body;
      const { userId } = req.user;
@@ -274,6 +274,77 @@ app.delete("/delete-story/:id", AuthenticateToken, async(req,res)=>{
         return res.status(400).json({error: true, message: error.message});
     }
 });
+
+//Update isFavourite
+app.put("/update-is-favourite/:id", AuthenticateToken, async(req,res)=>{
+    const { id } = req.params;
+    const { isFavourite } = req.body;
+    const { userId } = req.user;
+
+    try{
+        const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
+        if(!travelStory){
+            return res.status(404).json({error: true, message: "Travel Story Not Found"});
+        };
+
+        travelStory.isFavourite=isFavourite;
+        await travelStory.save();
+
+        return res.status(200).json({ story:travelStory, message:"Updated Successfully"});
+    }
+    catch(error){
+        return res.status(400).json({error: true, message: error.message});
+    }
+})
+
+//Search Travel Stories
+app.get("/search", AuthenticateToken, async(req,res)=>{
+    const { query } = req.query;
+    const { userId } = req.user;
+
+    if(!query){
+        return res.status(400).json({error: true, message: "Please enter a search query"});
+    };
+
+    try{
+        const searchResults = await TravelStory.find({
+            userId:userId,
+            $or:[
+                {title:{$regex:query,$options:'i'} },
+                {story:{$regex:query,$options:'i'}},
+                { visitedLocation: {$regex:query,$options:'i'}},
+            ],
+        }).sort({ isFavourite: -1});
+
+        return res.status(200).json({ stories: searchResults});
+    }
+    catch(error){
+        return res.status(400).json({error: true, message: error.message});
+    }
+});
+
+// Filter stories by date range
+app.get("/travel-stories/filter", AuthenticateToken, async(req,res)=>{
+    const { startDate, endDate } = req.query;
+    const { userId } = req.user;
+
+    try{
+        //Convert startDate and endDate from milliseconds to Date objects
+        const start = new Date(parseInt(startDate));
+        const end = new Date(parseInt(endDate));
+
+        // Find travel stories that belong to the authenticated user and fall within the date range
+        const filteredStories = await TravelStory.find({
+            userId:userId,
+            visitedDate: { $gte: start, $lte:end},
+        }).sort({ isFavourite: -1});
+
+        return res.status(200).json({stories: filteredStories});
+    }
+    catch(error){
+        return res.status(400).json({error: true, message: error.message});
+    }
+})
 
 
 
