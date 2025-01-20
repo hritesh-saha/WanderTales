@@ -26,4 +26,8 @@
   .btn-light {
     @apply bg-cyan-50 text-primary shadow-cyan-100/0 border border-cyan-400 hover:bg-primary hover:text-white;
   }
+
+  .login-ui-box {
+    @apply w-80 h-[450px] rounded-full bg-primary absolute rotate-45
+  }
 }
