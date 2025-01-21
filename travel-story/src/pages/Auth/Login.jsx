@@ -2,6 +2,7 @@ import { useState} from 'react'
 import PasswordInput from '../../components/input/PasswordInput'
 import {useNavigate} from "react-router-dom"
 import { validateEmail } from '../../utils/helper';
+import axiosInstance from '../../utils/axiosInstance';
 
 const Login = () => {
 
@@ -11,7 +12,7 @@ const Login = () => {
 
   const navigate= useNavigate();
 
-  const handleLogin = (e) =>{
+  const handleLogin = async(e) =>{
     e.preventDefault();
     if(!validateEmail(email)){
       SetError("Please enter a valid Email Address");
@@ -24,6 +25,27 @@ const Login = () => {
     }
 
     SetError("");
+
+    //Login API Call
+    try{
+      const response = await axiosInstance.post("/login",{
+        email: email,
+        password: password,
+      });
+
+      //Handle successful response
+      if(response.data && response.data.accessToken){
+        localStorage.setItem("token", response.data.accessToken);
+        navigate("/dashboard");
+      }
+    }
+    catch(error){
+      if( error.response && error.response.data && error.response.data.message){
+        SetError(error.response.data.message);
+      } else {
+        SetError("An unexpected error has occurred. Pleas try again");
+      }
+    }
   }
 
   return (
@@ -32,7 +54,7 @@ const Login = () => {
        <div className='login-ui-box right-10 -top-40' />
        <div className='login-ui-box bg-cyan-200 -bottom-40 right-1/2' />
 
-      <div className='container h-screen flex justify-center items-center px-20 mx-auto'>
+      <div className='container h-screen flex flex-wrap justify-center items-center px-20 mx-auto'>
         <div className='w-2/4 h-[90vh] flex flex-col justify-end bg-login-bg-img bg-cover bg-center rounded-lg p-10 z-50'>
           <h4 className='text-5xl text-white font-semibold leading-[58px]'>
             Capture Your <br/> Journeys
@@ -53,7 +75,7 @@ const Login = () => {
             value={password} onChange={(e)=>{ SetPassword(e.target.value)}}
             />
     
-           { error && <p className='text-red-500 text-xs pb-1'>{error}</p>}
+           { error && <p className='text-red-500 text-xs pb-1 pl-2'>{error}</p>}
 
             <button type='submit' className="btn-primary">
               LOGIN
