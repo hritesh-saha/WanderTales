@@ -14,6 +14,21 @@
   }
 }
 
+/* Custom scrollbar styles */
+.scrollbar::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  background-color: #057c8e;
+  border-radius: 3px;
+}
+
+.scrollbar::-webkit-scrollbar-track {
+  background-color: rgb(172, 201, 229);
+}
+
 @layer components {
   .input-box {
     @apply w-full text-sm bg-cyan-600/5 rounded px-5 py-3 mb-4 outline-none;
@@ -31,7 +46,15 @@
     @apply w-80 h-[450px] rounded-full bg-primary absolute rotate-45
   }
 
+  .model-box {
+    @apply w-[80vw] md:w-[40%] h-[80vh] bg-white rounded-lg mx-auto mt-14 p-5 overflow-y-scroll scrollbar z-50;
+  }
+
   .icon-btn {
     @apply text-[22px] text-slate-300 cursor-pointer hover:text-red-500;
+  }
+
+  .btn-small {
+    @apply flex items-center gap-1 text-xs font-medium bg-cyan-50 text-primary shadow-cyan-100/0 border border-cyan-100 hover:bg-primary hover:text-white rounded px-3 py-[3px];
   }
 }
