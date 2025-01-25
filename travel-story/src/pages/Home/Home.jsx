@@ -93,7 +93,7 @@ const Home = () => {
       <div className='flex gap-7'>
         <div className="flex-1">
           {allStories.length > 0 ? (
-            <div className='grid grid-cols-2 gap-4 ml-10'>{allStories.map((item)=> {
+            <div className='grid grid-cols-2 gap-8 ml-10'>{allStories.map((item)=> {
               return (
                 <TravelStoryCard 
                 key={item._id}
