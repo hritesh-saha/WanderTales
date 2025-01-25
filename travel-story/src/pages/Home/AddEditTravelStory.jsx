@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { MdAdd, MdClose, MdDeleteOutline, MdUpdate } from 'react-icons/md'
 import DateSelector from '../../components/input/DateSelector';
+import ImageSelector from '../../components/input/ImageSelector';
+// Added a css import for DateSelector in main.jsx
 
 const AddEditTravelStory = ({ storyInfo,
     type,
@@ -14,6 +16,10 @@ const AddEditTravelStory = ({ storyInfo,
     const [visitedDate, setVisitedDate] = useState(null);
 
     const handleAddorUpdateClick = () => {};
+
+    //Delet story image and Update the story
+    const handleDeleteImg = async() => {}
+
   return (
     <div>
         <div className="flex items-center justify-between">
@@ -54,15 +60,26 @@ const AddEditTravelStory = ({ storyInfo,
                     <DateSelector date={visitedDate} setDate={setVisitedDate} />
                 </div>
 
+                <ImageSelector
+                image={storyImg}
+                setImage={setStoryImg}
+                handleDeleteImg={handleDeleteImg}
+                />
+
                 <div className='flex flex-col gap-2 mt-4'>
                     <label className="input-label">STORY</label>
                     <textarea 
                     type="text"
-                    className='text-sm text-slate-950 outline-none bg-slate-50 p-2 rounded'
+                    className='text-sm text-slate-950 outline-none bg-slate-200 p-2 rounded border border-slate-400/50'
                     placeholder='Your Story'
                     rows={10}
                     value={story}
                     onChange={(e)=>setStory(e.target.value)}></textarea>
+                </div>
+
+                <div className="pt-3">
+                    <label className="input-label">VISITED LOCATIONS</label>
+                    <TagInput tags={visitedLocation} setTag={setVisitedLocation}/>
                 </div>
             </div>
         </div>
