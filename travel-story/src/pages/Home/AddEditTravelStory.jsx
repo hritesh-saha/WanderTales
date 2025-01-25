@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { MdAdd, MdClose, MdDeleteOutline, MdUpdate } from 'react-icons/md'
 import DateSelector from '../../components/input/DateSelector';
 import ImageSelector from '../../components/input/ImageSelector';
+import TagInput from '../../components/input/TagInput';
 // Added a css import for DateSelector in main.jsx
 
 const AddEditTravelStory = ({ storyInfo,
