@@ -9,6 +9,7 @@ import TravelStoryCard from '../../components/Cards/TravelStoryCard';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AddEditTravelStory from './AddEditTravelStory';
+import ViewTravelStory from './ViewTravelStory';
 
 const Home = () => {
   const navigate= useNavigate();
@@ -19,7 +20,12 @@ const Home = () => {
     isShown: false,
     type: "add",
     data: null,
-  })
+  });
+
+  const [openViewModal, setOpenViewModal] = useState({
+    isShown: false,
+    data: null,
+  });
    
   //Get User Info
   const getUserInfo = async () => {
@@ -53,10 +59,15 @@ const Home = () => {
   }
 
   //Handle Edit Story Click
-  const handleEdit = (data) =>{}
+  const handleEdit = (data) =>{
+    console.log(data);
+    setOpenAddEditModal({ isShown: true, type: "edit", data: data })
+  }
 
   //Handle Travel Story Click
-  const hanleViewStory = (data) => {}
+  const handleViewStory = (data) => {
+    setOpenViewModal({ isShown: true, data });
+  }
 
   //Handle Update isFavourite
   const updateIsFavourite = async(storyData) => {
@@ -133,11 +144,37 @@ const Home = () => {
     >
       <AddEditTravelStory
       type={openAddEditModal.type}
-      story={openAddEditModal.data}
+      storyInfo={openAddEditModal.data}
       onClose={() => {
         setOpenAddEditModal({isShown: false, type: "add", data: null})
       }}
       getAllTravelStories={getAllTravelStories}
+      />
+    </Modal>
+
+    {/* View Travel Story Model  */}
+    <Modal
+    isOpen={openViewModal.isShown}
+    onRequestClose={() => {}}
+    style={{
+      overlay: {
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        zIndex: 999,
+      },
+    }}
+    appElement={document.getElementById("root")}
+    className="model-box"
+    >
+      <ViewTravelStory
+      storyInfo={openViewModal.data || null}
+      onClose={()=>{
+        setOpenViewModal((prevState) => ({ ...prevState, isShown:false}));
+      }}
+      onEditClick={(prevState)=>{
+        setOpenViewModal((prevState) => ({ ...prevState, isShown:false}));
+        handleEdit(openViewModal.data || null);
+      }}
+      onDeleteClick={()=>{}}
       />
     </Modal>
 

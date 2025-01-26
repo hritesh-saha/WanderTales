@@ -9,18 +9,20 @@ import { toast } from 'react-toastify';
 import uploadImage from '../../utils/uploadImage';
 // Added a css import for DateSelector in main.jsx
 
-const AddEditTravelStory = ({ storyInfo,
+const AddEditTravelStory = ({ 
+    storyInfo,
     type,
     onClose,
     getAllTravelStories,
 }) => {
-    const [title, setTitle] = useState("");
-    const [storyImg, setStoryImg] = useState(null);
-    const [story, setStory] = useState("");
-    const [visitedLocation, setVisitedLocation] = useState([]);
-    const [visitedDate, setVisitedDate] = useState(null);
+    const [title, setTitle] = useState( storyInfo?.title || "");
+    const [storyImg, setStoryImg] = useState( storyInfo?.imageUrl || null);
+    const [story, setStory] = useState( storyInfo?.story || "");
+    const [visitedLocation, setVisitedLocation] = useState( storyInfo?.visitedLocation || []);
+    const [visitedDate, setVisitedDate] = useState( storyInfo?.visitedDate || null);
 
     const [error, setError] = useState(null);
+
 
     //Add new Travel Story
     const addNewTravelStory = async () => {
@@ -57,7 +59,55 @@ const AddEditTravelStory = ({ storyInfo,
     }
 
     //Update Travel Story
-    const updateTravelStory = async () => {}
+    const updateTravelStory = async () => {
+        const storyId = storyInfo._id;
+        try{
+            let imageUrl="";
+
+            let postData = {
+                title:title,
+                story:story,
+                imageUrl:storyInfo.imageUrl || "",
+                visitedLocation:visitedLocation,
+                visitedDate:visitedDate
+                ? moment(visitedDate).valueOf()
+                : moment().valueOf(),
+            }
+
+            if(typeof storyImg === "object"){
+                const imgUploadRes = await uploadImage(storyImg);
+                //Get image URL
+                imageUrl = imgUploadRes.imageUrl || "";
+
+                postData= {
+                    ...postData,
+                    imageUrl:imageUrl
+                };   
+            }
+            
+            const response = await axiosInstance.put("/edit-story/"+storyId, postData);
+
+            if(response.data && response.data.story){
+                toast.success("Story Updated Successfully!");
+                //Refresh stories
+                getAllTravelStories();
+                //Close modal
+                onClose();
+            }
+        }
+        catch(error){
+            if(
+                error.response &&
+                error.response.data &&
+                error.response.data.message
+            ){
+                setError(error.response.data.message);
+            }else{
+                //Handle unexpected error
+                setError("An Unexpected Error has occured. please try again.");
+            }
+        }
+    }
 
     const handleAddorUpdateClick = () => {
         console.log("Input Data:",{title, storyImg, story, visitedLocation, visitedDate});
@@ -85,7 +135,7 @@ const AddEditTravelStory = ({ storyInfo,
     const handleDeleteImg = async() => {}
 
   return (
-    <div>
+    <div className='relative'>
         <div className="flex items-center justify-between">
             <h5 className="text-xl font-medium text-slate-700">
                 {type === "add" ? "Add Story" : "Update Story"}
