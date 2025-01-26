@@ -2,14 +2,26 @@ import React from 'react'
 import {useNavigate} from "react-router-dom"
 import LOGO from "../assets/logo.svg"
 import ProfileInfo from './Cards/ProfileInfo'
+import SearchBar from './input/SearchBar'
 
-const Navbar = ({ userInfo }) => {
+const Navbar = ({ userInfo, searchQuery, setSearchQuery, onSearchNote, handleClearSearch }) => {
     const isToken = localStorage.getItem("token");
    const navigate = useNavigate();
 
    const onLogout = () =>{
     localStorage.clear();
     navigate("/login");
+   }
+
+   const handleSearch = () => {
+    if(searchQuery){
+      onSearchNote(searchQuery);
+    }
+   }
+
+   const onClearSearch = () => {
+    handleClearSearch();
+    setSearchQuery("");
    }
 
   return (
@@ -19,7 +31,15 @@ const Navbar = ({ userInfo }) => {
         <p className='text-primary pt-2'>𝓦𝓪𝓷𝓭𝓮𝓻 𝓣𝓪𝓵𝓮𝓼</p>
         </div>
 
-        { isToken && <ProfileInfo userInfo={userInfo} onLogout={onLogout}/> }
+        { isToken && ( <>
+         <SearchBar
+         value={searchQuery}
+         onChange={(e)=> { setSearchQuery(e.target.value);}}
+         handleSearch={handleSearch}
+         onClearSearch={onClearSearch}
+         />
+         <ProfileInfo userInfo={userInfo} onLogout={onLogout}/>
+          </>) }
     </div>
   )
 }
