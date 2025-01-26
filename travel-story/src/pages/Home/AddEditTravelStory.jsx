@@ -132,7 +132,29 @@ const AddEditTravelStory = ({
     };
 
     //Delete story image and Update the story
-    const handleDeleteImg = async() => {}
+    const handleDeleteImg = async() => {
+        //Delete the Image
+        const deleteImgRes= await axiosInstance.delete("/delete-image", {
+            params: {
+                imageUrl: storyInfo.imageUrl,
+            },
+        });
+        if(deleteImgRes.data){
+            const storyId = storyInfo._id;
+
+            let postData = {
+                title,
+                story,
+                visitedLocation,
+                visitedDate: moment().valueOf(),
+                imageUrl: "",
+            };
+
+            // Updating Story
+            const response = await axiosInstance.put("/edit-story/"+storyId, postData);
+            setStoryImg(null);
+        }
+    }
 
   return (
     <div className='relative'>

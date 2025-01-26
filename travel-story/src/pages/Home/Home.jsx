@@ -10,6 +10,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import AddEditTravelStory from './AddEditTravelStory';
 import ViewTravelStory from './ViewTravelStory';
+import EmptyCard from '../../components/Cards/EmptyCard';
+import { FaRegAddressBook } from 'react-icons/fa6';
 
 const Home = () => {
   const navigate= useNavigate();
@@ -89,6 +91,24 @@ const Home = () => {
     }
   }
 
+  // Delete Story
+  const deleteTravelStory = async(data) => {
+    const storyId= data._id;
+
+    try{
+      const response =await axiosInstance.delete("/delete-story/"+storyId);
+
+      if(response.data && !response.data.error){
+        toast.error("Story Deleted Successfully!");
+        setOpenViewModal((prevState)=> ({ ...prevState, isShown:false}));
+        getAllTravelStories();
+      }
+    }catch(error){
+          //Handle unexpected error
+          setError("An Unexpected Error has occured. please try again.");
+      }
+  }
+
   useEffect(()=> {
     getAllTravelStories();
     getUserInfo();
@@ -121,7 +141,7 @@ const Home = () => {
               )
             })}</div>
           ):(
-            <>Empty Card Here</>
+            <EmptyCard imgSrc={<FaRegAddressBook className='w-24 h-24 ml-4 mt-4'/>} message={`Start your journey by sharing unforgettable moments - click 'Add' Button to cherish and relive your adventures!`}/>
           )}
         </div>
 
@@ -174,12 +194,14 @@ const Home = () => {
         setOpenViewModal((prevState) => ({ ...prevState, isShown:false}));
         handleEdit(openViewModal.data || null);
       }}
-      onDeleteClick={()=>{}}
+      onDeleteClick={()=>{
+        deleteTravelStory(openViewModal.data || null)
+      }}
       />
     </Modal>
 
 
-    <button className='w-14 h-14 flex items-center justify-center rounded-full bg-primary hover:bg-cyan-400 fixed right-10 bottom-10' 
+    <button className='w-16 h-16 flex items-center justify-center rounded-full bg-primary hover:bg-cyan-400 fixed right-12 bottom-12' 
     onClick={() => setOpenAddEditModal({ isShown: true, type: "add", data:null })}
     >
       <MdAdd className="text-[32px] text-white" />

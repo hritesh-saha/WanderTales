@@ -120,7 +120,7 @@ app.post("/image-upload", upload.single("image"), async(req,res)=>{
         }
 
         const imageUrl=`http://localhost:8000/uploads/${req.file.filename}`;
-        return res.json({error: false, imageUrl: imageUrl, message: "Image uploaded successfully!"});
+        return res.status(200).json({error: false, imageUrl: imageUrl, message: "Image uploaded successfully!"});
     }
     catch(error){
         return res.status(400).json({error: true, message: error.message});
@@ -210,7 +210,7 @@ app.put("/edit-story/:id", AuthenticateToken, async(req,res)=>{
      const { title, story, visitedLocation, imageUrl, visitedDate}= req.body;
      const { userId } = req.user;
 
-     if(!title || !story || !visitedLocation || !imageUrl || !visitedDate){
+     if(!title || !story || !visitedLocation || !visitedDate){
         return res.status(400).json({error: true, message: "Please fill all the fields!"});
     };
 
