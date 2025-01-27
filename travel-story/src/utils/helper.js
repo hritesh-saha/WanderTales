@@ -13,3 +13,14 @@ export const getInitials = (name) => {
                          .join(""); // Join the letters to form initials
     return initials;
 };
+
+export const getEmptyCardMessage = (filterType) => {
+    switch (filterType) {
+        case "search":
+            return `Oops! No stories found for your search.`;
+        case "date":
+            return `No stories found for given date range.`;
+        default:
+            return `Start your journey by sharing unforgettable moments - click 'Add' Button to cherish and relive your adventures!`;
+    }
+}

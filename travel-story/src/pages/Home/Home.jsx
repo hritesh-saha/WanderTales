@@ -12,13 +12,20 @@ import AddEditTravelStory from './AddEditTravelStory';
 import ViewTravelStory from './ViewTravelStory';
 import EmptyCard from '../../components/Cards/EmptyCard';
 import { FaRegAddressBook } from 'react-icons/fa6';
+import { DayPicker } from 'react-day-picker';
+import moment from 'moment';
+import FilterInfoTitle from '../../components/Cards/FilterInfoTitle';
+import { getEmptyCardMessage } from '../../utils/helper';
 
 const Home = () => {
   const navigate= useNavigate();
   const [userInfo, setUserInfo] = useState(null);
   const [allStories, setAllStories] = useState([]);
 
-  const [searchQuery, setSearchQuery] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState("");
+
+  const [dateRange, setDateRange] = useState({ from: null, to: null });
 
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
@@ -85,7 +92,14 @@ const Home = () => {
       );
       if(response.data && response.data.story){
         toast.success("Story Updated Successfully!");
-        getAllTravelStories();
+        
+        if(filterType === "search" && searchQuery){
+          onSearchStory(searchQuery);
+        } else if(filterType === "date"){
+          filterStoriesByDate(dateRange);
+        } else {
+          getAllTravelStories();
+        }
       }
     }
     catch(error){
@@ -127,11 +141,47 @@ const Home = () => {
 
     }catch(error){
           //Handle unexpected error
-          setError("An Unexpected Error has occured. please try again.");
+          console.log("An Unexpected Error has occured. please try again.");
       }
   }
 
-  const handleClearSearch = () => {}
+  const handleClearSearch = () => {
+    setFilterType("");
+    getAllTravelStories();
+  }
+
+  //Handle Filter Travel Story by Date Range
+  const filterStoriesByDate = async(day) => {
+    try{
+      const startDate=day.from ? moment(day.from).valueOf() : null;
+      const endDate=day.to ? moment(day.to).valueOf() : null;
+
+      if(startDate && endDate){
+        const response = await axiosInstance.get("/travel-stories/filter",{
+          params: { startDate, endDate }
+        });
+        if(response.data && response.data.stories){
+          setFilterType("date");
+          setAllStories(response.data.stories);
+        }
+      }
+    }catch(error){
+      //Handle unexpected error
+      console.log("An Unexpected Error has occured. please try again.");
+    }
+  }
+
+  //Handle Date Range Select
+  const handleDayClick = (day) => {
+    setDateRange(day);
+    filterStoriesByDate(day);
+  }
+
+  const resetFilter = () => {
+    setDateRange({ from:null, to:null});
+    setFilterType("");
+    getAllTravelStories();
+  }
 
   useEffect(()=> {
     getAllTravelStories();
@@ -146,11 +196,21 @@ const Home = () => {
     userInfo={userInfo}
     searchQuery={searchQuery} 
     setSearchQuery={setSearchQuery}
-    handleSearch={onSearchStory}
+    onSearchNote={onSearchStory}
     handleClearSearch={handleClearSearch}
     />
  
     <div className="container mx-auto py-10">
+
+      <FilterInfoTitle
+      filterType={filterType}
+      filterDates={dateRange}
+      onClear={()=>{
+        resetFilter();
+      }}
+      />
+
+
       <div className='flex gap-7'>
         <div className="flex-1">
           {allStories.length > 0 ? (
@@ -171,11 +231,23 @@ const Home = () => {
               )
             })}</div>
           ):(
-            <EmptyCard imgSrc={<FaRegAddressBook className='w-24 h-24 ml-4 mt-4'/>} message={`Start your journey by sharing unforgettable moments - click 'Add' Button to cherish and relive your adventures!`}/>
+            <EmptyCard imgSrc={<FaRegAddressBook className='w-24 h-24 ml-4 mt-4'/>} message={getEmptyCardMessage(filterType)}/>
           )}
         </div>
 
-        <div className='w-[320px]'></div>
+        <div className='w-[350px]'>
+          <div className="bg-white border border-slate-200 shadow-lg shadow-slate-300/60 rounded-lg mr-5">
+            <div className="p-3">
+              <DayPicker
+              captionLayout="dropdown-buttons"
+              mode="range"
+              selected={dateRange}
+              onSelect={handleDayClick}
+              pagedNavigation
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 

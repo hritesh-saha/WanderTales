@@ -13,7 +13,7 @@ const TravelStoryCard = ({ imgUrl,
     onClick,
 }) => {
   return (
-    <div className='border border-slate-400/50 rounded-lg overflow-hidden bg-white hover:shadow-lg hover:shadow-slate-200 transition-all ease-in-out relative cursor-pointer'>
+    <div className='border border-slate-600/60 rounded-lg overflow-hidden bg-white hover:shadow-lg hover:shadow-slate-200 transition-all ease-in-out relative cursor-pointer'>
         <img src={imgUrl} 
         alt={title}
         className='w-full h-56 object-cover rounded-lg'
