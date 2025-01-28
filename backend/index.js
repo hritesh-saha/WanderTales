@@ -370,7 +370,17 @@ app.get("/travel-stories/filter", AuthenticateToken, async(req,res)=>{
             visitedDate: { $gte: start, $lte:end},
         }).sort({ isFavourite: -1});
 
-        return res.status(200).json({stories: filteredStories});
+        // Transform search results to include base64 image if present
+        const storiesWithImages = filteredStories.map((story) => {
+            const transformedStory = story.toObject(); // Convert Mongoose document to plain object
+            if (story.imageUrl && story.imageUrl.data) {
+                const base64Image = story.imageUrl.data.toString("base64");
+                transformedStory.imageUrl = `data:${story.imageUrl.contentType};base64,${base64Image}`;
+            }
+            return transformedStory;
+        });
+
+        return res.status(200).json({ stories: storiesWithImages });
     }
     catch(error){
         return res.status(400).json({error: true, message: error.message});
