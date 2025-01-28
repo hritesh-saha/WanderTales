@@ -1,11 +1,13 @@
 import axios from "axios";
-import { BASE_URL } from "./constants";
+
+//const BASE_URL = import.meta.env.VITE_BASE_URL;
+const BASE_URL = "http://localhost:8000";
 
 const axiosInstance = axios.create({
     baseURL: BASE_URL,
-    timeout: 1000,
+    timeout: 10000,
     headers: {
-        "Content-Type":"application/json",
+        'Content-Type': 'multipart/form-data',  // Ensures that FormData is correctly sent
     },
 });
 

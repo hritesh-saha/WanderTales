@@ -27,13 +27,18 @@ const TagInput = ({ tags, setTags }) => {
     setTags(tags.filter((tag) => tag !== tagToRemove))
   }
 
+  const parsedTags = Array.isArray(tags) && tags.length > 0 
+  ? tags  // If `tags` is a valid array, use it as is
+  : (tags && tags[0] ? JSON.parse(tags[0]) : []);
+
   return (
     <div>
-      {tags.length > 0 && (
+      {parsedTags.length > 0 && (
         <div className='flex items-center gap-2 flex-wrap mt-2'>
-          {tags.map((tag, index) => (
+          {parsedTags.map((tag, index) => (
             <span key={index} className='flex items-center gap-2 text-sm text-cyan-600 bg-cyan-200/40 px-3 py-1 rounded'>
-              <GrMapLocation className='text-sm'/> {tag}
+              <GrMapLocation className='text-sm'/> {tag.replace(/[\[\]"]/g, '')}
+
                 <button onClick={()=> handleRemoveTag(tag)}>
                   <MdClose/>
                 </button>

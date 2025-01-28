@@ -42,6 +42,7 @@ const Home = () => {
   const getUserInfo = async () => {
     try{
       const response = await axiosInstance.get("/get-user");
+      console.log(response.data.user);
       if(response.data && response.data.user){
         // Set user info if exists
         setUserInfo(response.data.user);
@@ -60,12 +61,13 @@ const Home = () => {
   const getAllTravelStories = async () => {
     try{
       const response = await axiosInstance.get("/get-all-stories");
+      console.log(response.data);
       if(response.data && response.data.stories){
         setAllStories(response.data.stories);
       }
     }
     catch(error){
-      console.log("An unexpected error has occured. Please Try again.");
+      console.log("An unexpected error has occured. Please Try again.",error);
     }
   }
 
@@ -88,7 +90,11 @@ const Home = () => {
       const response = await axiosInstance.put("/update-is-favourite/"+storyId,
         {
           isFavourite: !storyData.isFavourite,
-        }
+        }, {
+          headers: {
+              'Content-Type': 'application/json', // Override multipart/form-data with application/json for login
+          }
+      }
       );
       if(response.data && response.data.story){
         toast.success("Story Updated Successfully!");

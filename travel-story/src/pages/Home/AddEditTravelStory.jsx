@@ -26,66 +26,56 @@ const AddEditTravelStory = ({
 
     //Add new Travel Story
     const addNewTravelStory = async () => {
-        try{
-            let imageUrl="";
-            //Upload image if present
-            if(storyImg){
-                const imgUploadRes = await uploadImage(storyImg);
-                //Get image URL
-                imageUrl= imgUploadRes.imageUrl || "";
+        try {
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("story", story);
+            formData.append("visitedLocation", visitedLocation);
+            formData.append("visitedDate", visitedDate ? moment(visitedDate).valueOf() : moment().valueOf());
+    
+            // If there's a story image, append it as well
+            if (storyImg) {
+                formData.append('image', storyImg);  // 'image' matches the name expected in multer
             }
-
-            const response = await axiosInstance.post("/add-travel-story",{
-                title:title,
-                story:story,
-                imageUrl:imageUrl || "",
-                visitedLocation:visitedLocation,
-                visitedDate:visitedDate
-                ? moment(visitedDate).valueOf()
-                : moment().valueOf(),
-            });
-
-            if(response.data && response.data.story){
+    
+            const response = await axiosInstance.post("/add-travel-story", formData);
+    
+            if (response.data && response.data.story) {
                 toast.success("Story Added Successfully!");
-                //Refresh stories
+                // Refresh stories
                 getAllTravelStories();
-                //Close modal
+                // Close modal
                 onClose();
             }
-        }
-        catch(error){
+        } catch (error) {
             setError(error.message);
         }
-    }
+    };
+    
 
     //Update Travel Story
     const updateTravelStory = async () => {
         const storyId = storyInfo._id;
         try{
-            let imageUrl="";
+            const formData = new FormData();
+        formData.append("title", title);
+        formData.append("story", story);
+        formData.append("visitedLocation", visitedLocation);
+        formData.append("visitedDate", visitedDate ? moment(visitedDate).valueOf() : moment().valueOf());
 
-            let postData = {
-                title:title,
-                story:story,
-                imageUrl:storyInfo.imageUrl || "",
-                visitedLocation:visitedLocation,
-                visitedDate:visitedDate
-                ? moment(visitedDate).valueOf()
-                : moment().valueOf(),
-            }
-
-            if(typeof storyImg === "object"){
-                const imgUploadRes = await uploadImage(storyImg);
-                //Get image URL
-                imageUrl = imgUploadRes.imageUrl || "";
-
-                postData= {
-                    ...postData,
-                    imageUrl:imageUrl
-                };   
-            }
+        // Handle the image
+        if (typeof storyImg === "object") {
+            // If a new image is provided, add it to formData
+            formData.append("image", storyImg);
+        } else if (storyInfo.imageUrl) {
+            // If no new image is provided, send back the previous image
+            formData.append("exists", true); // Assuming `data` contains the base64 string
+        } else {
+            // If no image exists, send an empty string
+            formData.append("image", "");
+        }
             
-            const response = await axiosInstance.put("/edit-story/"+storyId, postData);
+            const response = await axiosInstance.put("/edit-story/"+storyId, formData);
 
             if(response.data && response.data.story){
                 toast.success("Story Updated Successfully!");
@@ -105,6 +95,7 @@ const AddEditTravelStory = ({
             }else{
                 //Handle unexpected error
                 setError("An Unexpected Error has occured. please try again.");
+                console.log(error);
             }
         }
     }
@@ -131,7 +122,7 @@ const AddEditTravelStory = ({
         }
     };
 
-    //Delete story image and Update the story
+    {/*//Delete story image and Update the story
     const handleDeleteImg = async() => {
         //Delete the Image
         const deleteImgRes= await axiosInstance.delete("/delete-image", {
@@ -154,7 +145,7 @@ const AddEditTravelStory = ({
             const response = await axiosInstance.put("/edit-story/"+storyId, postData);
             setStoryImg(null);
         }
-    }
+    }*/}
 
   return (
     <div className='relative'>
@@ -202,7 +193,7 @@ const AddEditTravelStory = ({
                 <ImageSelector
                 image={storyImg}
                 setImage={setStoryImg}
-                handleDeleteImg={handleDeleteImg}
+                //handleDeleteImg={handleDeleteImg}
                 />
 
                 <div className='flex flex-col gap-2 mt-4'>

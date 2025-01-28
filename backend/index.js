@@ -7,12 +7,15 @@ const mongoose=require("mongoose");
 const jwt = require("jsonwebtoken");
 const path=require("path");
 const fs=require("fs");
+const multer = require("multer");
 
 const { AuthenticateToken }= require("./utilities/utilities");
 
 const User=require("./models/user.model");
 const TravelStory=require("./models/travelStory.model");
-const upload = require("./multer");
+//const upload = require("./multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 
 const port=process.env.PORT;
@@ -86,7 +89,7 @@ app.post("/login",async(req,res)=>{
     });
   
     return res.status(200).json({error:false, message:"Login SuccessFul",
-        yser:{
+        user:{
             fullName: user.fullName,
             email: user.email,
         },
@@ -112,103 +115,133 @@ app.get("/get-user", AuthenticateToken, async(req,res)=>{
   });
 });
 
-//Route to handle Image Upload
-app.post("/image-upload", upload.single("image"), async(req,res)=>{
-    try{
-        if(!req.file){
-            return res.status(400).json({error: true, message: "Please upload an image!"});
+
+app.post("/add-travel-story", AuthenticateToken, upload.single("image"), async (req, res) => {
+    const { title, story, visitedLocation, visitedDate } = req.body;
+    const { userId } = req.user;
+
+    try {
+        // Searching for placeholder story
+        const placeholderStory = await TravelStory.findOne({
+            title: "placeholder",
+            userId: new mongoose.Types.ObjectId("000000000000000000000000"),
+        });
+
+        if (placeholderStory) {
+            console.log("Placeholder found");
         }
 
-        const imageUrl=`http://localhost:8000/uploads/${req.file.filename}`;
-        return res.status(200).json({error: false, imageUrl: imageUrl, message: "Image uploaded successfully!"});
-    }
-    catch(error){
-        return res.status(400).json({error: true, message: error.message});
-    }
-});
-
-//Delete an Image from Uploads folder
-app.delete("/delete-image", async(req,res)=>{
-    const { imageUrl }= req.query;
-    if(!imageUrl){
-        return res.status(400).json({error: true, message: "Please provide the imagURL!"});
-    };
-
-    try{
-        //Extract filename from imageURL
-        const filename= path.basename(imageUrl);
-
-        //Define file path
-        const filePath = path.join(__dirname, "uploads", filename);
-
-        //Check if file exists
-        if(fs.existsSync(filePath)){
-            //Delete file
-            fs.unlinkSync(filePath);
-            return res.status(200).json({ message:"Image deleted Successfully"});
-        } else {
-            return res.status(400).json({error: true, message: "Image not found!"});
+        // Handle image URL (uploaded or placeholder)
+        let imageUrl = null;
+        if (req.file) {
+            // File is uploaded, store in imageUrl
+            imageUrl = {
+                data: req.file.buffer,
+                contentType: req.file.mimetype,
+            };
+        } else if (placeholderStory && placeholderStory.imageUrl) {
+            // No file uploaded, use the placeholder's imageUrl
+            imageUrl = {
+                data: placeholderStory.imageUrl.data,
+                contentType: placeholderStory.imageUrl.contentType,
+            };
         }
-    }catch(error){
-        return res.status(500).json({error: true, message: error.message});
-    }
-});
 
-// Serve static files from the uploads and assets directory
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/assets", express.static(path.join(__dirname, "assets")));
+        // Ensure we have image data
+        if (!imageUrl || !imageUrl.data) {
+            return res.status(400).json({
+                error: true,
+                message: "No image found. Please provide an image for this story.",
+            });
+        }
 
+        if (!title || !story || !visitedLocation || !visitedDate) {
+            return res.status(400).json({ error: true, message: "Please fill all the fields!" });
+        }
 
-//Add Travel Story
-app.post("/add-travel-story", AuthenticateToken, async(req,res)=>{
-    const { title, story, visitedLocation, imageUrl, visitedDate}= req.body;
-    const { userId }= req.user;
+        const parsedvisitedDate = new Date(parseInt(visitedDate)); // Convert visitedDate to Date Object
 
-    if(!title || !story || !visitedLocation || !imageUrl || !visitedDate){
-        return res.status(400).json({error: true, message: "Please fill all the fields!"});
-    };
-
-    //Convert visitedDate from milliseconds to Date Object
-    const parsedvisitedDate = new Date(parseInt(visitedDate));
-
-    try{
-        const travelStory= new TravelStory({
+        // Save the travel story with the image
+        const travelStory = new TravelStory({
             title,
             story,
             visitedLocation,
             userId,
-            imageUrl,
             visitedDate: parsedvisitedDate,
+            imageUrl,
+            //isFavourite: isFavourite !== undefined ? JSON.parse(isFavourite) : false,
         });
+
         await travelStory.save();
 
         return res.status(201).json({
-            story: travelStory, message:"Added Successfully"
+            story: travelStory,
+            message: "Travel Story Added Successfully",
         });
-    }
-    catch(error){
-        return res.status(400).json({error: true, message: error.message});
+    } catch (error) {
+        console.error("Error saving travel story:", error);
+        return res.status(400).json({ error: true, message: error.message });
     }
 });
+
 
 //Get all Travel Stories
-app.get("/get-all-stories", AuthenticateToken, async(req,res)=>{
-    const { userId }= req.user;
+app.get("/get-all-stories", AuthenticateToken, async (req, res) => {
+    const { userId } = req.user;
 
-    try{
-        const travelStories = await TravelStory.find({userId: userId}).sort({ isFavourite:-1});
-        return res.json({error: false, stories: travelStories, message: "Travel Stories Found"});
-    }
-    catch(error){
-        return res.status(400).json({error: true, message: error.message});
+    try {
+        // Fetch all travel stories for the given userId, sorted by isFavourite
+        const travelStories = await TravelStory.find({ userId }).sort({ isFavourite: -1 });
+
+        // Transform stories to include base64 image if present
+        const storiesWithImages = travelStories.map((story) => {
+            const transformedStory = story.toObject(); // Convert Mongoose document to plain object
+            if (story.imageUrl && story.imageUrl.data) {
+                const base64Image = story.imageUrl.data.toString("base64");
+                transformedStory.imageUrl = `data:${story.imageUrl.contentType};base64,${base64Image}`;
+            }
+            return transformedStory;
+        });
+
+        return res.status(200).json({
+            error: false,
+            stories: storiesWithImages,
+            message: "Travel Stories Found",
+        });
+    } catch (error) {
+        console.error("Error fetching travel stories:", error);
+        return res.status(500).json({ error: true, message: "Unable to fetch travel stories." });
     }
 });
 
+
+
 //Edit Travel Story
-app.put("/edit-story/:id", AuthenticateToken, async(req,res)=>{
+app.put("/edit-story/:id", AuthenticateToken, upload.single("image"),async(req,res)=>{
      const { id } =req.params;
-     const { title, story, visitedLocation, imageUrl, visitedDate}= req.body;
+     const { title, story, visitedLocation, visitedDate, exists}= req.body;
      const { userId } = req.user;
+
+     const placeholderStory = await TravelStory.findOne({ title: "placeholder",userId:new mongoose.Types.ObjectId("000000000000000000000000") });
+
+     let imageUrl;
+
+     if(exists){
+        const user = await TravelStory.findOne({ _id:id, userId:userId })
+        imageUrl = user.imageUrl
+     }else {
+        imageUrl = req.file ? {
+            data: req.file.buffer,
+            contentType: req.file.mimetype,
+        } : (placeholderStory ? placeholderStory.imageUrl : null);
+     }
+
+    if (!imageUrl) {
+        return res.status(400).json({
+            error: true,
+            message: "No placeholder image found in the database. Please provide an image for this story.",
+        });
+    }
 
      if(!title || !story || !visitedLocation || !visitedDate){
         return res.status(400).json({error: true, message: "Please fill all the fields!"});
@@ -225,12 +258,11 @@ app.put("/edit-story/:id", AuthenticateToken, async(req,res)=>{
             return res.status(404).json({error: true, message: "Travel Story Not Found"});
         };
 
-        const placeholderImageUrl = `http://localhost:8000/assets/placeholder.jpg`;
 
         travelStory.title=title;
         travelStory.story=story;
         travelStory.visitedLocation = visitedLocation;
-        travelStory.imageUrl = imageUrl || placeholderImageUrl;
+        travelStory.imageUrl = imageUrl;
         travelStory.visitedDate = parsedvisitedDate;
 
         await travelStory.save();
@@ -256,18 +288,6 @@ app.delete("/delete-story/:id", AuthenticateToken, async(req,res)=>{
 
         await travelStory.deleteOne({ _id: id, userId: userId });
 
-        //Extract Filename from ImageUrl
-        const filename = travelStory.imageUrl;
-        const filePath = path.join(__dirname, 'uploads', filename);
-
-        // Attempt to delete the image file from the uploads folder
-        fs.unlink(filePath, (err) => {
-            if (err) {
-                console.error("Error deleting file:", err.message); // Log the error for debugging purposes
-                return; // Proceed even if file deletion fails
-            }
-        });
-
         return res.status(200).json({ message: "Travel story deleted successfully!"});
     }
     catch(error){
@@ -286,6 +306,7 @@ app.put("/update-is-favourite/:id", AuthenticateToken, async(req,res)=>{
         if(!travelStory){
             return res.status(404).json({error: true, message: "Travel Story Not Found"});
         };
+        //const isFavourite=JSON.parse(isFavourite);
 
         travelStory.isFavourite=isFavourite;
         await travelStory.save();

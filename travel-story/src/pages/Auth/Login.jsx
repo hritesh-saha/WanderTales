@@ -31,7 +31,11 @@ const Login = () => {
       const response = await axiosInstance.post("/login",{
         email: email,
         password: password,
-      });
+      }, {
+        headers: {
+            'Content-Type': 'application/json', // Override multipart/form-data with application/json for login
+        }
+    });
 
       //Handle successful response
       if(response.data && response.data.accessToken){
@@ -43,7 +47,7 @@ const Login = () => {
       if( error.response && error.response.data && error.response.data.message){
         SetError(error.response.data.message);
       } else {
-        SetError("An unexpected error has occurred. Pleas try again");
+        SetError("An unexpected error has occurred. Please try again");
       }
     }
   }
