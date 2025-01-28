@@ -28,7 +28,7 @@ const TagInput = ({ tags, setTags }) => {
   }
 
   const parsedTags = Array.isArray(tags) && tags.length > 0 
-  ? tags  // If `tags` is a valid array, use it as is
+  ? tags 
   : (tags && tags[0] ? JSON.parse(tags[0]) : []);
 
   return (
