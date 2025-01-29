@@ -1,5 +1,7 @@
 import React from 'react'
 import { getInitials } from '../../utils/helper'
+import { IoLogOutOutline } from "react-icons/io5";
+import { Tooltip } from "react-tooltip";
 
 const ProfileInfo = ({ userInfo, onLogout}) => {
   return (
@@ -8,10 +10,11 @@ const ProfileInfo = ({ userInfo, onLogout}) => {
             {getInitials(userInfo?.fullName || "")}
         </div>
 
-        <div>
-            <p className="text-sm font-medium">{userInfo?.fullName || ""}</p>
+        <div className='flex flex-row'>
+            <p className="text-sm font-medium mt-1">{userInfo?.fullName || ""}&nbsp;&nbsp;&nbsp;</p>
             <button className='text-sm text-slate-700 underline' onClick={onLogout}>
-                Logout
+               <IoLogOutOutline data-tooltip-id="logout-tooltip"  className='w-6 h-6'/>
+               <Tooltip id='logout-tooltip' place="bottom-end" content='LogOut' />
             </button>
         </div>
     </div>) 

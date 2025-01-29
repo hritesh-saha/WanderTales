@@ -1,6 +1,7 @@
 import React from 'react'
 import { FaMagnifyingGlass } from 'react-icons/fa6'
 import { IoMdClose } from "react-icons/io"
+import { Tooltip } from "react-tooltip";
 
 const SearchBar = ({ value, onChange, handleSearch, onClearSearch }) => {
 
@@ -28,7 +29,8 @@ const SearchBar = ({ value, onChange, handleSearch, onClearSearch }) => {
           />
           }
 
-          <FaMagnifyingGlass className='text-slate-400 cursor-pointer hover:text-black' onClick={handleSearch}/>
+          <FaMagnifyingGlass data-tooltip-id="search-tooltip" className='text-slate-400 cursor-pointer hover:text-black' onClick={handleSearch}/>
+          <Tooltip id="search-tooltip" place="bottom-end" content='search' />
     </div>
   )
 }

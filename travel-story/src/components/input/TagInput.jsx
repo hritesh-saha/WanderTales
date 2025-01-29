@@ -27,9 +27,11 @@ const TagInput = ({ tags, setTags }) => {
     setTags(tags.filter((tag) => tag !== tagToRemove))
   }
 
-  const parsedTags = Array.isArray(tags) && tags.length > 0 
-  ? tags 
-  : (tags && tags[0] ? JSON.parse(tags[0]) : []);
+  const parsedTags = Array.isArray(tags) && tags.length > 0
+  ? (typeof tags[0] === "string" && tags[0].startsWith("[") && tags[0].endsWith("]") 
+      ? JSON.parse(tags[0])  // Parse if it's a JSON stringified array
+      : tags)  // Else, treat it as a normal array
+  : [];
 
   return (
     <div>

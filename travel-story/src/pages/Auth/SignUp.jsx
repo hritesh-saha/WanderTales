@@ -39,7 +39,11 @@ const SignUp = () => {
         fullName: name,
         email: email,
         password: password,
-      });
+      }, {
+        headers: {
+            'Content-Type': 'application/json', // Override multipart/form-data with application/json for login
+        }
+    });
 
       //Handle successful response
       if(response.data && response.data.accessToken){
