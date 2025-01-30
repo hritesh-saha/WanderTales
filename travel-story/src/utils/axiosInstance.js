@@ -1,7 +1,7 @@
 import axios from "axios";
 
 //const BASE_URL = import.meta.env.VITE_BASE_URL;
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = "https://wander-tales-backend.vercel.app/";
 
 const axiosInstance = axios.create({
     baseURL: BASE_URL,

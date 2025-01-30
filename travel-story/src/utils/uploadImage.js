@@ -1,3 +1,4 @@
+//For LocalHost
 import axiosInstance from "./axiosInstance";
 
  const uploadImage = async (imageFile) => {
