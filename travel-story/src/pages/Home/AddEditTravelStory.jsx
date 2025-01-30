@@ -6,7 +6,7 @@ import TagInput from '../../components/input/TagInput';
 import moment from 'moment';
 import axiosInstance from '../../utils/axiosInstance';
 import { toast } from 'react-toastify';
-import uploadImage from '../../utils/uploadImage';
+//import uploadImage from '../../utils/uploadImage';
 // Added a css import for DateSelector in main.jsx
 
 const AddEditTravelStory = ({ 
@@ -38,7 +38,7 @@ const AddEditTravelStory = ({
                 formData.append('image', storyImg);  // 'image' matches the name expected in multer
             }
     
-            const response = await axiosInstance.post("/add-travel-story", formData);
+            const response = await axiosInstance.post("/api/add-travel-story", formData);
     
             if (response.data && response.data.story) {
                 toast.success("Story Added Successfully!");
@@ -75,7 +75,7 @@ const AddEditTravelStory = ({
             formData.append("image", "");
         }
             
-            const response = await axiosInstance.put("/edit-story/"+storyId, formData);
+            const response = await axiosInstance.put("/api/edit-story/"+storyId, formData);
 
             if(response.data && response.data.story){
                 toast.success("Story Updated Successfully!");
@@ -219,8 +219,3 @@ const AddEditTravelStory = ({
 }
 
 export default AddEditTravelStory
-
-
-//<button className='btn-small btn-delete' onClick={onClose}>
-//                        <MdDeleteOutline className='text-lg'/> DELETE
-//                    </button>

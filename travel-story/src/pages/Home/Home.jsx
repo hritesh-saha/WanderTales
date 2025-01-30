@@ -41,7 +41,7 @@ const Home = () => {
   //Get User Info
   const getUserInfo = async () => {
     try{
-      const response = await axiosInstance.get("/get-user");
+      const response = await axiosInstance.get("/auth/get-user");
       console.log(response.data.user);
       if(response.data && response.data.user){
         // Set user info if exists
@@ -60,7 +60,7 @@ const Home = () => {
   //Get All Travel Stories
   const getAllTravelStories = async () => {
     try{
-      const response = await axiosInstance.get("/get-all-stories");
+      const response = await axiosInstance.get("/api/get-all-stories");
       console.log(response.data);
       if(response.data && response.data.stories){
         setAllStories(response.data.stories);
@@ -87,7 +87,7 @@ const Home = () => {
     const storyId= storyData._id;
 
     try{
-      const response = await axiosInstance.put("/update-is-favourite/"+storyId,
+      const response = await axiosInstance.put("/api/update-is-favourite/"+storyId,
         {
           isFavourite: !storyData.isFavourite,
         }, {
@@ -118,7 +118,7 @@ const Home = () => {
     const storyId= data._id;
 
     try{
-      const response =await axiosInstance.delete("/delete-story/"+storyId);
+      const response =await axiosInstance.delete("/api/delete-story/"+storyId);
 
       if(response.data && !response.data.error){
         toast.error("Story Deleted Successfully!");
@@ -134,7 +134,7 @@ const Home = () => {
   // Search Story
   const onSearchStory = async(query) => {
     try{
-      const response =await axiosInstance.get("/search",{
+      const response =await axiosInstance.get("/api/search",{
         params: {
           query,
         }
@@ -163,7 +163,7 @@ const Home = () => {
       const endDate=day.to ? moment(day.to).valueOf() : null;
 
       if(startDate && endDate){
-        const response = await axiosInstance.get("/travel-stories/filter",{
+        const response = await axiosInstance.get("/api/travel-stories/filter",{
           params: { startDate, endDate }
         });
         if(response.data && response.data.stories){
