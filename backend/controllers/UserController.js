@@ -23,12 +23,12 @@ export const createAccount = async(req,res)=>{
     });
 
     await user.save();
-    const accessToken= jwt.sign(
-        {userId: user._id},
-        process.env.ACCESS_TOKEN_SECRET,
-        {
-            expiresIn: "72h",
-        }
+    const expiresInSeconds = 72 * 60 * 60; // 72 hours in seconds
+    const expiryTimestamp = Math.floor(Date.now() / 1000) + expiresInSeconds; // Convert to UNIX timestamp
+
+    const accessToken = jwt.sign(
+        { userId: user._id, exp: expiryTimestamp },  // Add expiry inside token payload
+        process.env.ACCESS_TOKEN_SECRET
     );
 
     return res.status(201).json({
@@ -38,7 +38,8 @@ export const createAccount = async(req,res)=>{
             email: user.email,
         },
         accessToken,
-        message:"Registration SuccessFul",
+        tokenExpiry: expiryTimestamp, // Send token expiry time to frontend
+        message: "Registration Successful",
     });
 };
 
@@ -58,16 +59,23 @@ export const login = async(req,res)=>{
         return res.status(400).json({error: true, message: "Invalid Password!"});
     }
 
-    const accessToken=jwt.sign({userId: user._id}, process.env.ACCESS_TOKEN_SECRET,{
-        expiresIn: "72h",
-    });
+    const expiresInSeconds = 72 * 60 * 60; // 72 hours in seconds
+    const expiryTimestamp = Math.floor(Date.now() / 1000) + expiresInSeconds; // Convert to UNIX timestamp
+
+    const accessToken = jwt.sign(
+        { userId: user._id, exp: expiryTimestamp },  // Include expiry in the JWT payload
+        process.env.ACCESS_TOKEN_SECRET
+    );
   
-    return res.status(200).json({error:false, message:"Login SuccessFul",
-        user:{
+    return res.status(200).json({
+        error: false,
+        message: "Login Successful",
+        user: {
             fullName: user.fullName,
             email: user.email,
         },
         accessToken,
+        tokenExpiry: expiryTimestamp, // Send expiry time to frontend
     });
 
 };

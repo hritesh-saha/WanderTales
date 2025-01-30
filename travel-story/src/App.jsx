@@ -5,6 +5,28 @@ import SignUp from "./pages/Auth/SignUp";
 import Home from "./pages/Home/Home";
 import './index.css';
 
+// Function to check if token is valid
+const isTokenValid = () => {
+  const token = localStorage.getItem("token");
+  const tokenExpiry = localStorage.getItem("tokenExpiry");
+
+  if (!token || !tokenExpiry) return false; // No token or expiry found
+
+  // Check if the token expiry time has passed
+  if (Date.now() > parseInt(tokenExpiry, 10)) {
+    localStorage.removeItem("token");
+    localStorage.removeItem("tokenExpiry");
+    return false; // Token is expired
+  }
+  
+  return true; // Token is valid
+};
+
+// Root component to handle initial redirection
+const Root = () => {
+  return isTokenValid() ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
+};
+
 const App = () => {
   return (
     <div>
@@ -20,13 +42,5 @@ const App = () => {
   )
 }
 
-//Define the Root component to handle the initial redirect
-const Root = () => {
-  //Check if token exists in localStorage
-  const isAuthenticated = !!localStorage.getItem("token");
-
-  //Redirect to dashboard if authenticated, otherwise to login
-  return isAuthenticated ? <Navigate to="/dashboard" /> : <Navigate to="/login" />;
-}
 
 export default App
