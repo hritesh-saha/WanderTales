@@ -24,7 +24,8 @@ const TagInput = ({ tags, setTags }) => {
   }
 
   const handleRemoveTag = (tagToRemove) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove))
+    const updatedTags = parsedTags.filter(tag => tag !== tagToRemove);
+  setTags(updatedTags);
   }
 
   const parsedTags = Array.isArray(tags) && tags.length > 0
