@@ -2,6 +2,7 @@ import moment from 'moment'
 import React from 'react'
 import { GrMapLocation } from 'react-icons/gr'
 import { MdClose, MdDeleteOutline, MdUpdate } from 'react-icons/md'
+import { Tooltip } from 'react-tooltip'
 
 const ViewTravelStory = ({ storyInfo, onClose, onEditClick, onDeleteClick }) => {
   return (
@@ -20,7 +21,8 @@ const ViewTravelStory = ({ storyInfo, onClose, onEditClick, onDeleteClick }) => 
                                 </button>
                 
                                 <button className='' onClick={onClose}>
-                                    <MdClose className='text-xl text-slate-400'/>
+                                    <MdClose data-tooltip-id="close-tooltip" className='text-xl text-slate-400'/>
+                                    <Tooltip id='close-tooltip' place="bottom-end" content='Close' />
                                 </button>
                 </div>
             </div>

@@ -11,7 +11,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import AddEditTravelStory from './AddEditTravelStory';
 import ViewTravelStory from './ViewTravelStory';
 import EmptyCard from '../../components/Cards/EmptyCard';
-import { FaRegAddressBook } from 'react-icons/fa6';
+import { MdOutlineSearchOff } from "react-icons/md";
+import { FaRegAddressBook, FaRegCalendarTimes } from "react-icons/fa";
 import { DayPicker } from 'react-day-picker';
 import moment from 'moment';
 import FilterInfoTitle from '../../components/Cards/FilterInfoTitle';
@@ -189,6 +190,18 @@ const Home = () => {
     getAllTravelStories();
   }
 
+  //Empty Card Icons
+  const getEmptyCardImg = (filterType) => {
+      switch(filterType) {
+          case "search":
+              return <MdOutlineSearchOff className='w-24 h-24 ml-4 mt-3'/>
+          case "date":
+              return <FaRegCalendarTimes className='w-24 h-24 ml-4 mt-3'/>
+          default:
+              return <FaRegAddressBook className='w-24 h-24 ml-4 mt-4'/>
+      }
+  }
+
   useEffect(()=> {
     getAllTravelStories();
     getUserInfo();
@@ -237,7 +250,7 @@ const Home = () => {
               )
             })}</div>
           ):(
-            <EmptyCard imgSrc={<FaRegAddressBook className='w-24 h-24 ml-4 mt-4'/>} message={getEmptyCardMessage(filterType)}/>
+            <EmptyCard imgSrc={getEmptyCardImg(filterType)} message={getEmptyCardMessage(filterType)}/>
           )}
         </div>
 
