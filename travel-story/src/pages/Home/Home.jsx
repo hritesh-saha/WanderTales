@@ -28,6 +28,8 @@ const Home = () => {
 
   const [dateRange, setDateRange] = useState({ from: null, to: null });
 
+  const [loading, setLoading] = useState(true);
+
   const [openAddEditModal, setOpenAddEditModal] = useState({
     isShown: false,
     type: "add",
@@ -42,6 +44,7 @@ const Home = () => {
   //Get User Info
   const getUserInfo = async () => {
     try{
+      setLoading(true);
       const response = await axiosInstance.get("/auth/get-user");
       console.log(response.data.user);
       if(response.data && response.data.user){
@@ -55,6 +58,9 @@ const Home = () => {
         localStorage.clear();
         navigate("/login");
       }
+    }
+    finally {
+      setLoading(false);
     }
   };
 
@@ -236,6 +242,7 @@ const Home = () => {
     <>
     <Navbar 
     userInfo={userInfo}
+    loading={loading}
     searchQuery={searchQuery} 
     setSearchQuery={setSearchQuery}
     onSearchNote={onSearchStory}

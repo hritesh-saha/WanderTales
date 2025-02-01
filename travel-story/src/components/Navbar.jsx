@@ -4,7 +4,7 @@ import LOGO from "../assets/logo.svg"
 import ProfileInfo from './Cards/ProfileInfo'
 import SearchBar from './input/SearchBar'
 
-const Navbar = ({ userInfo, searchQuery, setSearchQuery, onSearchNote, handleClearSearch }) => {
+const Navbar = ({ userInfo, loading, searchQuery, setSearchQuery, onSearchNote, handleClearSearch }) => {
     const isToken = localStorage.getItem("token");
    const navigate = useNavigate();
 
@@ -38,7 +38,7 @@ const Navbar = ({ userInfo, searchQuery, setSearchQuery, onSearchNote, handleCle
          handleSearch={handleSearch}
          onClearSearch={onClearSearch}
          />
-         <ProfileInfo userInfo={userInfo} onLogout={onLogout}/>
+         <ProfileInfo userInfo={userInfo} loading={loading} onLogout={onLogout}/>
           </>) }
     </div>
   )
