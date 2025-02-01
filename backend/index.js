@@ -2,7 +2,9 @@ import dotenv from "dotenv"
 dotenv.config();
 
 import express from "express";
-import cors from "cors"
+import cors from "cors";
+import compression from "compression";
+
 import StoryRoutes from "./routes/StoryRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
 
@@ -14,6 +16,7 @@ const app=express();
 
 app.use(express.json());
 app.use(cors({origin: "*"}));
+app.use(compression());
 
 app.use("/auth", UserRoutes);
 app.use("/api", StoryRoutes);
