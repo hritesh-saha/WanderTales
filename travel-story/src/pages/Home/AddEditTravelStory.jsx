@@ -27,6 +27,7 @@ const AddEditTravelStory = ({
     //Add new Travel Story
     const addNewTravelStory = async () => {
         try {
+            localStorage.removeItem("cachedStories");
             const formData = new FormData();
             formData.append("title", title);
             formData.append("story", story);
@@ -57,6 +58,7 @@ const AddEditTravelStory = ({
     const updateTravelStory = async () => {
         const storyId = storyInfo._id;
         try{
+            localStorage.removeItem("cachedStories");
             const formData = new FormData();
         formData.append("title", title);
         formData.append("story", story);

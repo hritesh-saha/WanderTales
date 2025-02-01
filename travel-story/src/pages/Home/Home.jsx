@@ -107,6 +107,7 @@ const Home = () => {
     const storyId= storyData._id;
 
     try{
+      localStorage.removeItem("cachedStories");
       const response = await axiosInstance.put("/api/update-is-favourite/"+storyId,
         {
           isFavourite: !storyData.isFavourite,
@@ -138,6 +139,7 @@ const Home = () => {
     const storyId= data._id;
 
     try{
+      localStorage.removeItem("cachedStories");
       const response =await axiosInstance.delete("/api/delete-story/"+storyId);
 
       if(response.data && !response.data.error){
@@ -154,6 +156,7 @@ const Home = () => {
   // Search Story
   const onSearchStory = async(query) => {
     try{
+      localStorage.removeItem("cachedStories");
       const response =await axiosInstance.get("/api/search",{
         params: {
           query,
@@ -179,6 +182,7 @@ const Home = () => {
   //Handle Filter Travel Story by Date Range
   const filterStoriesByDate = async(day) => {
     try{
+      localStorage.removeItem("cachedStories");
       const startDate=day.from ? moment(day.from).valueOf() : null;
       const endDate=day.to ? moment(day.to).valueOf() : null;
 
