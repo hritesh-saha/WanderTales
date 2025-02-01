@@ -66,17 +66,17 @@ const SignUp = () => {
        <div className='login-ui-box right-10 -top-40' />
        <div className='login-ui-box bg-cyan-200 -bottom-40 right-1/2' />
 
-      <div className='container h-screen flex flex-wrap justify-center items-center px-20 mx-auto'>
-        <div className='w-2/4 h-[90vh] flex flex-col justify-end bg-signup-bg-img bg-cover bg-center rounded-lg p-10 z-50'>
-          <h4 className='text-5xl text-white font-semibold leading-[58px]'>
-            Join the <br/> Adventures
+      <div className='container h-screen flex flex-col md:flex-wrap justify-center items-center px-20 mx-auto'>
+        <div className='w-full md:w-2/4 min-h-[90vh] flex flex-col justify-end bg-signup-bg-img bg-cover bg-center rounded-lg p-10 z-50'>
+          <h4 className='text-4xl md:text-5xl text-white font-semibold leading-[58px]'>
+            Embark on <br/> Escapes
           </h4>
           <p className='text-[15px] text-white leading-6 pr-7 mt-4'>
             Create an account to start documenting your travels and preserving
             your memories in your personal travel journal.
           </p>
         </div>
-        <div className='w-2/4  h-[75wh] bg-white rounded-r-lg relative p-16 shadow-lg shadow-cyan-200/20'>
+        <div className='w-full md:w-2/4  h-[75wh] bg-white rounded-r-lg relative p-16 shadow-lg shadow-cyan-200/20'>
           <form onSubmit={handleSignUp}>
             <h4 className="text-2xl font-bold mb-7">SignUp</h4>
 
