@@ -61,11 +61,30 @@ const Home = () => {
   //Get All Travel Stories
   const getAllTravelStories = async () => {
     try{
+      //Checked catched stories exist
+      const cachedStories=localStorage.getItem("cachedStories");
+      if(cachedStories){
+        const { stories, timestamp }=JSON.parse(cachedStories);
+        const oneHour= 60 * 60 * 1000;
+
+        if(timestamp - Date.now() < oneHour){
+          setAllStories(stories);
+          console.log("using cached stories");
+          return;
+        } else {
+          localStorage.removeItem("cachedStories");
+          console.log("Cache expired. Fetching new data");
+        }
+      }
+
       const response = await axiosInstance.get("/api/get-all-stories");
       console.log(response.data);
       if(response.data && response.data.stories){
         setAllStories(response.data.stories);
       }
+
+      // Store fetched data in localStorage
+      localStorage.setItem("cachedStories",JSON.stringify({ stories:response.data.stories, timestamp:Date.now(), }));
     }
     catch(error){
       console.log("An unexpected error has occured. Please Try again.",error);
