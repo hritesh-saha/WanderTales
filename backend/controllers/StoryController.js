@@ -1,42 +1,53 @@
 import mongoose from "mongoose";
 import TravelStory from "../models/travelStory.model.js";
+import cloudinary from "cloudinary";
+// import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
 
-export const addTravelStory =  async (req, res) => {
+dotenv.config(); // Load environment variables
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+export const addTravelStory = async (req, res) => {
     const { title, story, visitedLocation, visitedDate } = req.body;
     const { userId } = req.user;
 
     try {
-        // Searching for placeholder story
+        // Searching for a placeholder story
         const placeholderStory = await TravelStory.findOne({
             title: "placeholder",
             userId: new mongoose.Types.ObjectId("000000000000000000000000"),
         });
 
-        if (placeholderStory) {
-            console.log("Placeholder found");
-        }
-
-        // Handle image URL (uploaded or placeholder)
         let imageUrl = null;
+
         if (req.file) {
-            // File is uploaded, store in imageUrl
-            imageUrl = {
-                data: req.file.buffer,
-                contentType: req.file.mimetype,
-            };
+            // Convert file buffer to base64 and upload directly to Cloudinary
+            const uploadResult = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.v2.uploader.upload_stream(
+                    { folder: "travel_stories" },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                uploadStream.end(req.file.buffer);
+            });
+
+            imageUrl = uploadResult.secure_url;
         } else if (placeholderStory && placeholderStory.imageUrl) {
-            // No file uploaded, use the placeholder's imageUrl
-            imageUrl = {
-                data: placeholderStory.imageUrl.data,
-                contentType: placeholderStory.imageUrl.contentType,
-            };
+            // Use placeholder image if no new image is uploaded
+            imageUrl = placeholderStory.imageUrl;
         }
 
-        // Ensure we have image data
-        if (!imageUrl || !imageUrl.data) {
+        if (!imageUrl) {
             return res.status(400).json({
                 error: true,
-                message: "No image found. Please provide an image for this story.",
+                message: "No image found. Please upload an image for this story.",
             });
         }
 
@@ -44,17 +55,16 @@ export const addTravelStory =  async (req, res) => {
             return res.status(400).json({ error: true, message: "Please fill all the fields!" });
         }
 
-        const parsedvisitedDate = new Date(parseInt(visitedDate)); // Convert visitedDate to Date Object
+        const parsedVisitedDate = new Date(parseInt(visitedDate));
 
-        // Save the travel story with the image
+        // Save the travel story
         const travelStory = new TravelStory({
             title,
             story,
             visitedLocation,
             userId,
-            visitedDate: parsedvisitedDate,
-            imageUrl,
-            //isFavourite: isFavourite !== undefined ? JSON.parse(isFavourite) : false,
+            visitedDate: parsedVisitedDate,
+            imageUrl, // Store Cloudinary image URL
         });
 
         await travelStory.save();
@@ -76,19 +86,9 @@ export const getAllStories = async (req, res) => {
         // Fetch all travel stories for the given userId, sorted by isFavourite
         const travelStories = await TravelStory.find({ userId }).sort({ isFavourite: -1 });
 
-        // Transform stories to include base64 image if present
-        const storiesWithImages = travelStories.map((story) => {
-            const transformedStory = story.toObject(); // Convert Mongoose document to plain object
-            if (story.imageUrl && story.imageUrl.data) {
-                const base64Image = story.imageUrl.data.toString("base64");
-                transformedStory.imageUrl = `data:${story.imageUrl.contentType};base64,${base64Image}`;
-            }
-            return transformedStory;
-        });
-
         return res.status(200).json({
             error: false,
-            stories: storiesWithImages,
+            stories: travelStories,
             message: "Travel Stories Found",
         });
     } catch (error) {
@@ -97,61 +97,78 @@ export const getAllStories = async (req, res) => {
     }
 };
 
-export const editStory = async(req,res)=>{
-    const { id } =req.params;
-    const { title, story, visitedLocation, visitedDate, exists}= req.body;
+export const editStory = async (req, res) => {
+    const { id } = req.params;
+    const { title, story, visitedLocation, visitedDate, exists } = req.body;
     const { userId } = req.user;
 
-    const placeholderStory = await TravelStory.findOne({ title: "placeholder",userId:new mongoose.Types.ObjectId("000000000000000000000000") });
+    const placeholderStory = await TravelStory.findOne({
+        title: "placeholder",
+        userId: new mongoose.Types.ObjectId("000000000000000000000000"),
+    });
 
     let imageUrl;
 
-    if(exists){
-       const user = await TravelStory.findOne({ _id:id, userId:userId })
-       imageUrl = user.imageUrl
-    }else {
-       imageUrl = req.file ? {
-           data: req.file.buffer,
-           contentType: req.file.mimetype,
-       } : (placeholderStory ? placeholderStory.imageUrl : null);
+    if (exists) {
+        const user = await TravelStory.findOne({ _id: id, userId: userId });
+        imageUrl = user.imageUrl;
+    } else if (req.file) {
+        try {
+            // Convert file buffer to base64 and upload directly to Cloudinary
+            const uploadResult = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.v2.uploader.upload_stream(
+                    { folder: "travel_stories" },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                uploadStream.end(req.file.buffer);
+            });
+
+            imageUrl = uploadResult.secure_url;
+        } catch (error) {
+            return res.status(500).json({ error: true, message: "Image upload failed." });
+        }
+    } else if (placeholderStory && placeholderStory.imageUrl) {
+        // Use placeholder image if no new image is uploaded
+        imageUrl = placeholderStory.imageUrl;
     }
 
-   if (!imageUrl) {
-       return res.status(400).json({
-           error: true,
-           message: "No placeholder image found in the database. Please provide an image for this story.",
-       });
-   }
+    if (!imageUrl) {
+        return res.status(400).json({
+            error: true,
+            message: "No placeholder image found in the database. Please provide an image for this story.",
+        });
+    }
 
-    if(!title || !story || !visitedLocation || !visitedDate){
-       return res.status(400).json({error: true, message: "Please fill all the fields!"});
-   };
+    if (!title || !story || !visitedLocation || !visitedDate) {
+        return res.status(400).json({ error: true, message: "Please fill all the fields!" });
+    }
 
-   //Convert visitedDate from milliseconds to Date Object
-   const parsedvisitedDate = new Date(parseInt(visitedDate));
+    // Convert visitedDate from milliseconds to Date Object
+    const parsedvisitedDate = new Date(parseInt(visitedDate));
 
-   try{
-       //Find the travel story by ID and ensure it belongs to the authenticated user
-       const travelStory= await TravelStory.findOne({ _id:id, userId: userId});
+    try {
+        // Find the travel story by ID and ensure it belongs to the authenticated user
+        const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
 
-       if(!travelStory){
-           return res.status(404).json({error: true, message: "Travel Story Not Found"});
-       };
+        if (!travelStory) {
+            return res.status(404).json({ error: true, message: "Travel Story Not Found" });
+        }
 
+        travelStory.title = title;
+        travelStory.story = story;
+        travelStory.visitedLocation = visitedLocation;
+        travelStory.imageUrl = imageUrl;
+        travelStory.visitedDate = parsedvisitedDate;
 
-       travelStory.title=title;
-       travelStory.story=story;
-       travelStory.visitedLocation = visitedLocation;
-       travelStory.imageUrl = imageUrl;
-       travelStory.visitedDate = parsedvisitedDate;
+        await travelStory.save();
 
-       await travelStory.save();
-
-       return res.status(200).json({ story:travelStory, message:"Updated Successfully!"})
-   }
-   catch(error){
-       return res.status(400).json({error: true, message: error.message});
-   }
+        return res.status(200).json({ story: travelStory, message: "Updated Successfully!" });
+    } catch (error) {
+        return res.status(400).json({ error: true, message: error.message });
+    }
 };
 
 export const deleteStory = async(req,res)=>{
@@ -214,17 +231,8 @@ export const searchStory = async(req,res)=>{
             ],
         }).sort({ isFavourite: -1});
 
-        // Transform search results to include base64 image if present
-        const storiesWithImages = searchResults.map((story) => {
-            const transformedStory = story.toObject(); // Convert Mongoose document to plain object
-            if (story.imageUrl && story.imageUrl.data) {
-                const base64Image = story.imageUrl.data.toString("base64");
-                transformedStory.imageUrl = `data:${story.imageUrl.contentType};base64,${base64Image}`;
-            }
-            return transformedStory;
-        });
 
-        return res.status(200).json({ stories: storiesWithImages });
+        return res.status(200).json({ stories: searchResults });
     }
     catch(error){
         return res.status(400).json({error: true, message: error.message});
@@ -246,17 +254,7 @@ export const filteredStories = async(req,res)=>{
             visitedDate: { $gte: start, $lte:end},
         }).sort({ isFavourite: -1});
 
-        // Transform search results to include base64 image if present
-        const storiesWithImages = filteredStories.map((story) => {
-            const transformedStory = story.toObject(); // Convert Mongoose document to plain object
-            if (story.imageUrl && story.imageUrl.data) {
-                const base64Image = story.imageUrl.data.toString("base64");
-                transformedStory.imageUrl = `data:${story.imageUrl.contentType};base64,${base64Image}`;
-            }
-            return transformedStory;
-        });
-
-        return res.status(200).json({ stories: storiesWithImages });
+        return res.status(200).json({ stories: filteredStories });
     }
     catch(error){
         return res.status(400).json({error: true, message: error.message});

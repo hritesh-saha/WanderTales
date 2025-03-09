@@ -27,8 +27,8 @@ const travelStorySchema = new mongoose.Schema({
         default: Date.now,
     },
     imageUrl: {
-        data: Buffer, // Binary data for the image
-        contentType: String, // MIME type for the image
+        type: String, // Cloudinary URL will be stored here
+        required: true, // Ensure every story has an image
     },
     visitedDate:{
         type:Date,
