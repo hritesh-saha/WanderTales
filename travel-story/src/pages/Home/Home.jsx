@@ -67,21 +67,21 @@ const Home = () => {
   //Get All Travel Stories
   const getAllTravelStories = async () => {
     try{
-      //Checked catched stories exist
-      const cachedStories=localStorage.getItem("cachedStories");
-      if(cachedStories){
-        const { stories, timestamp }=JSON.parse(cachedStories);
-        const oneHour= 60 * 60 * 1000;
+      // //Checked catched stories exist
+      // const cachedStories=localStorage.getItem("cachedStories");
+      // if(cachedStories){
+      //   const { stories, timestamp }=JSON.parse(cachedStories);
+      //   const oneHour= 60 * 60 * 1000;
 
-        if(timestamp - Date.now() < oneHour){
-          setAllStories(stories);
-          console.log("using cached stories");
-          return;
-        } else {
-          localStorage.removeItem("cachedStories");
-          console.log("Cache expired. Fetching new data");
-        }
-      }
+      //   if(timestamp - Date.now() < oneHour){
+      //     setAllStories(stories);
+      //     console.log("using cached stories");
+      //     return;
+      //   } else {
+      //     localStorage.removeItem("cachedStories");
+      //     console.log("Cache expired. Fetching new data");
+      //   }
+      // }
 
       const response = await axiosInstance.get("/api/get-all-stories");
       console.log(response.data);
@@ -89,8 +89,8 @@ const Home = () => {
         setAllStories(response.data.stories);
       }
 
-      // Store fetched data in localStorage
-      localStorage.setItem("cachedStories",JSON.stringify({ stories:response.data.stories, timestamp:Date.now(), }));
+      // // Store fetched data in localStorage
+      // localStorage.setItem("cachedStories",JSON.stringify({ stories:response.data.stories, timestamp:Date.now(), }));
     }
     catch(error){
       console.log("An unexpected error has occured. Please Try again.",error);
@@ -113,7 +113,7 @@ const Home = () => {
     const storyId= storyData._id;
 
     try{
-      localStorage.removeItem("cachedStories");
+      // localStorage.removeItem("cachedStories");
       const response = await axiosInstance.put("/api/update-is-favourite/"+storyId,
         {
           isFavourite: !storyData.isFavourite,
@@ -145,7 +145,7 @@ const Home = () => {
     const storyId= data._id;
 
     try{
-      localStorage.removeItem("cachedStories");
+      // localStorage.removeItem("cachedStories");
       const response =await axiosInstance.delete("/api/delete-story/"+storyId);
 
       if(response.data && !response.data.error){
@@ -162,7 +162,7 @@ const Home = () => {
   // Search Story
   const onSearchStory = async(query) => {
     try{
-      localStorage.removeItem("cachedStories");
+      // localStorage.removeItem("cachedStories");
       const response =await axiosInstance.get("/api/search",{
         params: {
           query,
@@ -188,7 +188,7 @@ const Home = () => {
   //Handle Filter Travel Story by Date Range
   const filterStoriesByDate = async(day) => {
     try{
-      localStorage.removeItem("cachedStories");
+      // localStorage.removeItem("cachedStories");
       const startDate=day.from ? moment(day.from).valueOf() : null;
       const endDate=day.to ? moment(day.to).valueOf() : null;
 
