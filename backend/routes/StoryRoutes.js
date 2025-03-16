@@ -1,6 +1,6 @@
 import express from "express";
 import { AuthenticateToken } from "../middleware/utilities.js";
-import { addTravelStory, getAllStories, editStory, deleteStory, updateIsFavourite, searchStory, filteredStories } from "../controllers/StoryController.js";
+import { addTravelStory, getAllStories, editStory, deleteStory, updateIsFavourite, searchStory, filteredStories, exploreStories } from "../controllers/StoryController.js";
 
 import multer from "multer";
 const storage = multer.memoryStorage();
@@ -15,5 +15,6 @@ router.delete("/delete-story/:id", AuthenticateToken, deleteStory);
 router.put("/update-is-favourite/:id", AuthenticateToken, updateIsFavourite);
 router.get("/search", AuthenticateToken, searchStory);
 router.get("/travel-stories/filter", AuthenticateToken, filteredStories);
+router.get("/explore-stories",exploreStories);
 
 export default router;

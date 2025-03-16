@@ -13,9 +13,8 @@ cloudinary.config({
 });
 
 export const addTravelStory = async (req, res) => {
-    const { title, story, visitedLocation, visitedDate } = req.body;
+    const { title, story, visitedLocation, visitedDate, isPublic } = req.body;
     const { userId } = req.user;
-
     try {
         // Searching for a placeholder story
         const placeholderStory = await TravelStory.findOne({
@@ -54,6 +53,7 @@ export const addTravelStory = async (req, res) => {
         if (!title || !story || !visitedLocation || !visitedDate) {
             return res.status(400).json({ error: true, message: "Please fill all the fields!" });
         }
+        console.log("Request Body:", req.body);
 
         const parsedVisitedDate = new Date(parseInt(visitedDate));
 
@@ -62,6 +62,7 @@ export const addTravelStory = async (req, res) => {
             title,
             story,
             visitedLocation,
+            isPublic,
             userId,
             visitedDate: parsedVisitedDate,
             imageUrl, // Store Cloudinary image URL
@@ -99,7 +100,7 @@ export const getAllStories = async (req, res) => {
 
 export const editStory = async (req, res) => {
     const { id } = req.params;
-    const { title, story, visitedLocation, visitedDate, exists } = req.body;
+    const { title, story, visitedLocation, visitedDate, exists, isPublic } = req.body;
     const { userId } = req.user;
 
     const placeholderStory = await TravelStory.findOne({
@@ -162,6 +163,7 @@ export const editStory = async (req, res) => {
         travelStory.visitedLocation = visitedLocation;
         travelStory.imageUrl = imageUrl;
         travelStory.visitedDate = parsedvisitedDate;
+        travelStory.isPublic = isPublic;
 
         await travelStory.save();
 
@@ -258,5 +260,22 @@ export const filteredStories = async(req,res)=>{
     }
     catch(error){
         return res.status(400).json({error: true, message: error.message});
+    }
+};
+
+export const exploreStories = async (req, res) => {
+
+    try {
+        // Fetch all travel stories for the given userId, sorted by isFavourite
+        const travelStories = await TravelStory.find({ isPublic:true });
+
+        return res.status(200).json({
+            error: false,
+            stories: travelStories,
+            message: "Travel Stories Found",
+        });
+    } catch (error) {
+        console.error("Error fetching travel stories:", error);
+        return res.status(500).json({ error: true, message: "Unable to fetch travel stories." });
     }
 };

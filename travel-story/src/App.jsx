@@ -4,6 +4,7 @@ import Login from "./pages/Auth/Login";
 import SignUp from "./pages/Auth/SignUp";
 import Home from "./pages/Home/Home";
 import './index.css';
+import Explore from "./pages/Home/Explore";
 
 // Function to check if token is valid
 const isTokenValid = () => {
@@ -36,6 +37,7 @@ const App = () => {
           <Route path="/dashboard" exact element={<Home/>} />
           <Route path="/login" exact element={<Login/>} />
           <Route path="/signup" exact element={<SignUp/>} />
+          <Route path="/explore" exact element={<Explore/>} />
         </Routes>
       </Router>
     </div>

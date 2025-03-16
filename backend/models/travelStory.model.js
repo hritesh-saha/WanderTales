@@ -17,6 +17,10 @@ const travelStorySchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    isPublic: {
+        type: Boolean,
+        default: true, // By default, all stories are public
+    },    
     userId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",

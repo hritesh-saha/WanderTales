@@ -273,6 +273,7 @@ const Home = () => {
                 date={item.visitedDate}
                 visitedLocation={item.visitedLocation}
                 isFavourite={item.isFavourite}
+                isPublic={item.isPublic}
                 onEdit={() => handleEdit(item)}
                 onClick={() => handleViewStory(item)}
                 onFavouriteClick={() => updateIsFavourite(item)}
