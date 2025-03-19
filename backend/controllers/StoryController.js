@@ -173,25 +173,53 @@ export const editStory = async (req, res) => {
     }
 };
 
-export const deleteStory = async(req,res)=>{
+// export const deleteStory = async(req,res)=>{
+//     const { id } = req.params;
+//     const { userId } = req.user;
+//     try{
+//         //Find the travel story by ID and ensure it belongs to the authenticated user
+//         const travelStory= await TravelStory.findOne({ _id:id, userId: userId});
+
+//         if(!travelStory){
+//             return res.status(404).json({error: true, message: "Travel Story Not Found"});
+//         };
+
+//         await travelStory.deleteOne({ _id: id, userId: userId });
+
+//         return res.status(200).json({ message: "Travel story deleted successfully!"});
+//     }
+//     catch(error){
+//         return res.status(400).json({error: true, message: error.message});
+//     }
+// };
+export const deleteStory = async (req, res) => {
     const { id } = req.params;
     const { userId } = req.user;
-    try{
-        //Find the travel story by ID and ensure it belongs to the authenticated user
-        const travelStory= await TravelStory.findOne({ _id:id, userId: userId});
 
-        if(!travelStory){
-            return res.status(404).json({error: true, message: "Travel Story Not Found"});
-        };
+    try {
+        const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
 
-        await travelStory.deleteOne({ _id: id, userId: userId });
+        if (!travelStory) {
+            return res.status(404).json({ error: true, message: "Travel Story Not Found" });
+        }
 
-        return res.status(200).json({ message: "Travel story deleted successfully!"});
-    }
-    catch(error){
-        return res.status(400).json({error: true, message: error.message});
+        if (travelStory.imageUrl) {
+            // Extract public ID by removing everything before the last '/'
+            const publicId = travelStory.imageUrl.split('/').pop().split('.')[0];
+
+            // Delete the image from Cloudinary
+            await cloudinary.v2.uploader.destroy(`travel_stories/${publicId}`);
+        }
+        //Delte the fetched story
+        await travelStory.deleteOne();
+
+        return res.status(200).json({ message: "Travel story deleted successfully!" });
+    } catch (error) {
+        console.error("Error deleting travel story:", error);
+        return res.status(400).json({ error: true, message: error.message });
     }
 };
+
 
 export const updateIsFavourite = async(req,res)=>{
     const { id } = req.params;
