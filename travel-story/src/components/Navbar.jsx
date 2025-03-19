@@ -49,11 +49,14 @@ const Navbar = ({
             handleSearch={handleSearch}
             onClearSearch={onClearSearch}
           />
+
           <div className="h-10 w-10 flex items-center justify-center">
-            <span  className="flex items-center justify-center cursor-pointer" onClick={() => navigate("/explore")}>
-            <MdTravelExplore
-              className="text-3xl cursor-pointer mr-2"
-            />Explore
+            <span
+              className="flex items-center justify-center text-slate-950 font-medium cursor-pointer"
+              onClick={() => navigate("/explore")}
+            >
+              <MdTravelExplore className="text-3xl cursor-pointer mr-2" />
+              Explore
             </span>
           </div>
 

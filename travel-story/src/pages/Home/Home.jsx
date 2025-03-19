@@ -99,7 +99,7 @@ const Home = () => {
 
   //Handle Edit Story Click
   const handleEdit = (data) =>{
-    console.log(data);
+    // console.log(data);
     setOpenAddEditModal({ isShown: true, type: "edit", data: data })
   }
 
@@ -142,6 +142,7 @@ const Home = () => {
 
   // Delete Story
   const deleteTravelStory = async(data) => {
+    setLoading(true);
     const storyId= data._id;
 
     try{
@@ -156,6 +157,8 @@ const Home = () => {
     }catch(error){
           //Handle unexpected error
           setError("An Unexpected Error has occured. please try again.");
+      }finally{
+        setLoading(false);
       }
   };
 
@@ -349,6 +352,7 @@ const Home = () => {
       onDeleteClick={()=>{
         deleteTravelStory(openViewModal.data || null)
       }}
+      loading={loading}
       />
     </Modal>
 

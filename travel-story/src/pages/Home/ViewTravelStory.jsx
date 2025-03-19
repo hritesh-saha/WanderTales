@@ -9,6 +9,7 @@ const ViewTravelStory = ({
   onClose,
   onEditClick,
   onDeleteClick,
+  loading
 }) => {
   return (
     <div className="relative">
@@ -31,13 +32,21 @@ const ViewTravelStory = ({
       <div className="flex items-center justify-end">
         <div>
           <div className="flex items-center gap-3 bg-cyan-50/50 p-2 rounded-l-lg">
-            <button className="btn-small" onClick={onEditClick}>
+            <button className="btn-small" onClick={onEditClick} disabled={loading}>
               <MdUpdate className="text-lg" /> UPDATE STORY
             </button>
 
-            <button className="btn-small btn-delete" onClick={onDeleteClick}>
-              <MdDeleteOutline className="text-lg" /> DELETE
-            </button>
+           { loading ?
+            (
+                <div className="flex items-center gap-2">
+                <div className="animate-spin border-2 border-red-500 border-t-transparent rounded-full w-3.4 h-3.5 bg-white transition-all duration-300 hover:bg-red-500 hover:border-white"></div>
+                <span className="text-red-500 transition-all duration-300 hover:text-white">Processing...</span>
+              </div>
+              )
+           :
+            (<button className="btn-small btn-delete" onClick={onDeleteClick}>
+            <MdDeleteOutline className="text-lg" /> DELETE
+          </button>)}
 
             <button className="" onClick={onClose}>
               <MdClose
